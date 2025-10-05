@@ -1,7 +1,7 @@
 
 // Global Supabase + Auth helpers
-const SUPABASE_URL = "https://YOUR-PROJECT.supabase.co";
-const SUPABASE_ANON_KEY = "YOUR-ANON-KEY";
+const SUPABASE_URL = "https://vtshzessdtguvlyrjecl.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0c2h6ZXNzZHRndXZseXJqZWNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk2NzgyNDUsImV4cCI6MjA3NTI1NDI0NX0.N1daJ8Ji2IOMqz7LxBqoPX0cx7vLpAPGm4ulgXDTsQo";
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 export const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
