@@ -14,29 +14,29 @@
     e.preventDefault();
 
     const nama = f.nama.value.trim();
-    const email = f.email.value.trim();
+    const email = f.email.value.trim().toLowerCase(); // biar Gmail aman
     const password = f.password.value.trim();
 
-    // 🔍 Validasi dasar
+    // ✅ Validasi input
     if(!nama || !email || !password){
       alert("⚠️ Lengkapi semua data terlebih dahulu!");
       return;
     }
 
-    // 📧 Validasi format email
-    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+    // 📧 Cek format email (termasuk Gmail)
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/;
     if(!emailRegex.test(email)){
-      alert("⚠️ Format email tidak valid!\nGunakan format seperti: nama@email.com");
+      alert("⚠️ Format email tidak valid! Contoh: nama@gmail.com");
       return;
     }
 
-    // 🔒 Validasi panjang password
+    // 🔑 Cek panjang password
     if(password.length < 6){
       alert("⚠️ Kata sandi minimal 6 karakter!");
       return;
     }
 
-    // 🚀 Proses pendaftaran ke Supabase
+    // 🚀 Registrasi ke Supabase
     const { data, error } = await sb.auth.signUp({
       email: email,
       password: password,
@@ -45,22 +45,24 @@
 
     if(error){
       alert("❌ Pendaftaran gagal: " + error.message);
+      console.error(error);
       return;
     }
 
     const userId = data?.user?.id;
     if(!userId){
-      alert("❌ Tidak bisa mendapatkan ID pengguna baru.");
+      alert("❌ Gagal mendapatkan ID pengguna.");
       return;
     }
 
-    // 🧾 Simpan ke tabel profiles (role default: WARGA)
+    // 🧾 Tambahkan ke tabel profiles (role default: WARGA)
     const { error: errProfile } = await sb.from("profiles").insert([
       { id: userId, email: email, role: "WARGA" }
     ]);
 
     if(errProfile){
       alert("❌ Gagal menyimpan profil: " + errProfile.message);
+      console.error(errProfile);
       return;
     }
 
@@ -85,7 +87,7 @@
     <div class="card">
       <form id="f" class="grid">
         <input class="input" name="nama" type="text" placeholder="Nama Lengkap" required>
-        <input class="input" name="email" type="email" placeholder="Email Aktif" required>
+        <input class="input" name="email" type="email" placeholder="Alamat Email (misal: nama@gmail.com)" required>
         <input class="input" name="password" type="password" placeholder="Kata Sandi (min. 6 karakter)" minlength="6" required>
         <button class="btn" type="submit">Daftar Sekarang</button>
       </form>
@@ -97,7 +99,7 @@
   </main>
 
   <footer class="footer">
-    <small>© 2025 Portal RT Cilosari Barat · v2.8 Registrasi Aman</small>
+    <small>© 2025 Portal RT Cilosari Barat · v2.9 Registrasi Aman</small>
   </footer>
 </body>
 </html>
