@@ -1,0 +1,41 @@
+
+<!doctype html><html lang="id"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portal RT Cilosari Barat</title>
+<link rel="manifest" href="manifest.json"><link rel="icon" href="assets/icon-32.png">
+<link rel="stylesheet" href="style.css">
+<script type="module" src="smartinfo.js" defer></script>
+</head><body>
+<header class="header">
+  <div class="brand"><img class="logo" src="assets/icon-192.png" alt="Logo RT">
+    <div><h1>PORTAL DIGITAL RT01 / RW08 CILOSARI BARAT</h1>
+    <p>Kel. Kemijen · Kec. Semarang Timur · Kota Semarang</p></div>
+  </div>
+</header>
+<nav class="nav"><div class="inner">
+  <a href="index.html">🏠 Beranda</a>
+  <a href="dashboard-rt.html">📢 RT</a>
+  <a href="dashboard-pkk.html">🌸 PKK</a>
+  <a href="dashboard-karang.html">💪 Karang</a>
+  <a href="warga.html">👥 Warga</a>
+  <a href="login.html">🔐 Login</a>
+</div></nav>
+
+<img class="hero-banner" src="assets/hero-banner.png" alt="Logo Portal RT Cilosari Barat">
+
+<section class="running-text-container" aria-label="Pengumuman berjalan">
+  <div class="running-text"><span>Memuat pengumuman RT, PKK, dan Karang Taruna...</span></div>
+</section>
+<div id="notifBaru" class="notif-popup" role="status" aria-live="polite">🔔 Pengumuman baru dari <span id="bidangNotif">—</span></div>
+
+<main class="container">
+  <div class="grid grid-2">
+    <div class="card"><h3>Informasi Cepat</h3><p>Tulisan berjalan otomatis menampilkan info dari RT, PKK, dan Karang Taruna. Info darurat muncul lebih dulu.</p></div>
+    <div class="card"><h3>PWA Siap</h3><p>Tambahkan ke Layar Utama HP agar web bisa diakses cepat & tetap menampilkan info terakhir saat offline.</p></div>
+  </div>
+</main>
+<footer class="footer"><small>© 2025 Portal RT Cilosari Barat · v2.7b Full Integration</small></footer>
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}))}
+</script>
+</body></html>

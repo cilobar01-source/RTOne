@@ -1,0 +1,33 @@
+
+<!doctype html><html lang="id"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Login · Portal RT</title>
+<link rel="stylesheet" href="style.css">
+<script type="module">
+import { sb } from './script.js';
+const form = document.getElementById('f');
+form.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const email = f.email.value.trim(); const password = f.password.value;
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if(error){ alert('Login gagal: '+error.message); return; }
+  const { data: { session } } = await sb.auth.getSession();
+  const { data: prof } = await sb.from('profiles').select('role').eq('id', session.user.id).single();
+  const role = prof?.role || 'WARGA';
+  const map = { RT:'dashboard-rt.html', PKK:'dashboard-pkk.html', Karang:'dashboard-karang.html', WARGA:'warga.html' };
+  window.location.href = map[role] || 'index.html';
+});
+</script>
+</head><body class="role-RT">
+<header class="header"><div class="brand"><img class="logo" src="assets/icon-192.png"><div><h1>Portal RT — Login</h1><p>Masuk untuk mengelola pengumuman</p></div></div></header>
+<main class="container">
+  <div class="card">
+    <form id="f" class="grid">
+      <input class="input" name="email" type="email" placeholder="Email" required>
+      <input class="input" name="password" type="password" placeholder="Kata sandi" required>
+      <button class="btn" type="submit">Masuk</button>
+    </form>
+    <p>Belum punya akun? Minta dibuatkan oleh Admin RT.</p>
+  </div>
+</main>
+</body></html>

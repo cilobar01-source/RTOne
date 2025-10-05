@@ -1,0 +1,82 @@
+<!doctype html><html lang="id"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard Karang Taruna</title>
+<link rel="stylesheet" href="style.css">
+<script type="module">
+import { requireRole, setupLogout, sb } from './script.js';
+await requireRole(['RT','PKK','Karang']); setupLogout();
+const BIDANG = "Karang";
+
+const form = document.getElementById('formPengumuman');
+const list = document.getElementById('list');
+
+async function muat() {
+  const { data } = await sb.from('pengumuman')
+    .select('id,judul,tanggal,prioritas,status')
+    .eq('bidang', BIDANG)
+    .order('tanggal', { ascending:false });
+  list.innerHTML = (data||[]).map(d => `
+    <li class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <div><strong>\${d.tanggal}</strong> — \${d.judul}<div>Prioritas: <b>\${d.prioritas}</b> · Status: <b>\${d.status}</b></div></div>
+        <div style="display:flex;gap:6px">
+          <button class="btn" data-act="selesai" data-id="\${d.id}">Selesai</button>
+          <button class="btn" data-act="hapus" data-id="\${d.id}" style="background:#dc2626">Hapus</button>
+        </div>
+      </div>
+    </li>`).join('');
+}
+
+form.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const judul = form.judul.value.trim();
+  const tanggal = form.tanggal.value;
+  const prioritas = form.prioritas.value;
+  if(!judul||!tanggal) return alert('Lengkapi judul & tanggal');
+  const { error } = await sb.from('pengumuman').insert([{ judul, tanggal, bidang:BIDANG, prioritas, status:'aktif' }]);
+  if(error) alert('Gagal menambah: '+error.message);
+  form.reset(); muat();
+});
+
+document.addEventListener('click', async (e)=>{
+  const btn = e.target.closest('button[data-act]'); if(!btn) return;
+  const id = btn.dataset.id; const act = btn.dataset.act;
+  if(act==='hapus') { await sb.from('pengumuman').delete().eq('id', id); }
+  if(act==='selesai') { await sb.from('pengumuman').update({ status:'selesai' }).eq('id', id); }
+  muat();
+});
+
+muat();
+</script>
+</head><body class="role-Karang">
+<header class="header"><div class="brand">
+  <img class="logo" src="assets/logo-transparent.png" alt="Logo" style="width:56px;height:56px;border-radius:10px;border:2px solid var(--emas)">
+  <div><h1>Dashboard Karang Taruna</h1><p>Kelola pengumuman — bidang Karang</p></div>
+  <div style="margin-left:auto"><button id="logoutBtn" class="btn">🚪 Logout</button></div>
+</div></header>
+<nav class="nav"><div class="inner">
+  <a href="index.html">🏠 Beranda</a>
+  <a href="dashboard-rt.html">📢 RT</a>
+  <a href="dashboard-pkk.html">🌸 PKK</a>
+  <a href="dashboard-karang.html">💪 Karang</a>
+</div></nav>
+<main class="container">
+  <section class="card">
+    <h3>Tambah Pengumuman Karang</h3>
+    <form id="formPengumuman" class="grid">
+      <input class="input" name="judul" id="judul" placeholder="Judul..." required>
+      <input class="input" type="date" name="tanggal" id="tanggal" required>
+      <select class="input" name="prioritas" id="prioritas">
+        <option value="normal">Normal</option>
+        <option value="darurat">Darurat 🚨</option>
+      </select>
+      <button class="btn" type="submit">Simpan</button>
+    </form>
+  </section>
+  <section class="card">
+    <h3>Daftar Pengumuman</h3>
+    <ul id="list" style="padding-left:0;list-style:none"></ul>
+  </section>
+</main>
+<footer class="footer"><small>© 2025 Portal RT Cilosari Barat · v2.7b Full Integration</small></footer>
+</body></html>
