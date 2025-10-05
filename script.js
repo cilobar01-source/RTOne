@@ -1,30 +1,26 @@
+// Firebase Import
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword, 
+  sendEmailVerification, 
+  signInWithPhoneNumber, 
+  RecaptchaVerifier 
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-// Global Supabase + Auth helpers
-const SUPABASE_URL = "https://vtshzessdtguvlyrjecl.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0c2h6ZXNzZHRndXZseXJqZWNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk2NzgyNDUsImV4cCI6MjA3NTI1NDI0NX0.N1daJ8Ji2IOMqz7LxBqoPX0cx7vLpAPGm4ulgXDTsQo";
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-export const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Konfigurasi Firebase (punyamu)
+const firebaseConfig = {
+  apiKey: "AIzaSyCYm8G3JmmpQezxx4p4QpaMLeEhuNixNjA",
+  authDomain: "rt0108-9fd70.firebaseapp.com",
+  projectId: "rt0108-9fd70",
+  storageBucket: "rt0108-9fd70.firebasestorage.app",
+  messagingSenderId: "1038405084605",
+  appId: "1:1038405084605:web:e8f72322234ee8475d9ed4",
+  measurementId: "G-8RM8376FQX"
+};
 
-export async function getSessionProfile(){
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) return null;
-  const { data: prof } = await sb.from("profiles").select("role,email").eq("id", session.user.id).single();
-  return { session, role: prof?.role || "WARGA", email: session.user.email };
-}
-export async function requireRole(allowed){
-  const prof = await getSessionProfile();
-  if (!prof){ window.location.href = "login.html"; return null; }
-  if (!allowed.includes(prof.role)){
-    const map = { RT:"dashboard-rt.html", PKK:"dashboard-pkk.html", Karang:"dashboard-karang.html", WARGA:"warga.html" };
-    window.location.href = map[prof.role] || "index.html"; return null;
-  }
-  return prof;
-}
-export function setupLogout(btnId="logoutBtn"){
-  const el = document.getElementById(btnId);
-  if (!el) return;
-  el.addEventListener("click", async ()=>{
-    await sb.auth.signOut();
-    window.location.href = "login.html";
-  });
-}
+// Init Firebase
+export const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
