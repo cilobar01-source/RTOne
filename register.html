@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Daftar Akun · Portal RT Cilosari Barat</title>
+  <link rel="stylesheet" href="style.css">
+
+  <script type="module">
+  import { sb } from './script.js';
+
+  // Jalankan saat form disubmit
+  const form = document.getElementById('f');
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+
+    const nama = f.nama.value.trim();
+    const email = f.email.value.trim();
+    const password = f.password.value.trim();
+
+    if(!nama || !email || !password){
+      alert("⚠️ Lengkapi semua data terlebih dahulu!");
+      return;
+    }
+
+    // Buat akun baru di Supabase Auth
+    const { data, error } = await sb.auth.signUp({
+      email: email,
+      password: password,
+      options: { data: { nama } }
+    });
+
+    if(error){
+      alert("❌ Pendaftaran gagal: " + error.message);
+      return;
+    }
+
+    // Ambil ID user baru
+    const userId = data?.user?.id;
+    if(!userId){
+      alert("Terjadi kesalahan saat mengambil data pengguna.");
+      return;
+    }
+
+    // Tambahkan ke tabel profiles (role default = WARGA)
+    const { error: errProfile } = await sb.from("profiles").insert([
+      { id: userId, email: email, role: "WARGA" }
+    ]);
+
+    if(errProfile){
+      alert("❌ Gagal menyimpan profil: " + errProfile.message);
+      return;
+    }
+
+    alert("✅ Pendaftaran berhasil! Silakan login dengan akun Anda.");
+    window.location.href = "login.html";
+  });
+  </script>
+
+</head>
+
+<body>
+  <header class="header">
+    <div class="brand">
+      <img class="logo" src="assets/icon-192.png" alt="Logo RT">
+      <div>
+        <h1>Daftar Akun Baru</h1>
+        <p>Portal RT01 / RW08 Cilosari Barat</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <form id="f" class="grid">
+        <input class="input" name="nama" type="text" placeholder="Nama Lengkap" required>
+        <input class="input" name="email" type="email" placeholder="Email Aktif" required>
+        <input class="input" name="password" type="password" placeholder="Kata Sandi (min. 6 karakter)" minlength="6" required>
+        <button class="btn" type="submit">Daftar Sekarang</button>
+      </form>
+
+      <p style="text-align:center;margin-top:10px">
+        Sudah punya akun? <a href="login.html">Masuk di sini</a>
+      </p>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <small>© 2025 Portal RT Cilosari Barat · v2.8 Registrasi Aman</small>
+  </footer>
+</body>
+</html>
