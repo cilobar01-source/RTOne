@@ -100,6 +100,7 @@
   </div>
 
   <script type="module">
+    // 🔹 Import konfigurasi Firebase
     import { app, auth, db } from "./script.js";
     import { createUserWithEmailAndPassword, sendEmailVerification } 
       from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
@@ -121,9 +122,13 @@
       }
 
       try {
+        console.log("⏳ Membuat akun...");
         const userCred = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCred.user;
+        console.log("✅ Akun berhasil dibuat:", user.uid);
+
         await sendEmailVerification(user);
+        console.log("✉️ Email verifikasi dikirim");
 
         await setDoc(doc(db, "profiles", user.uid), {
           nama,
@@ -134,7 +139,7 @@
           createdAt: serverTimestamp()
         });
 
-        alert("✅ Pendaftaran berhasil! Silakan verifikasi email kamu.");
+        alert("🎉 Registrasi berhasil! Silakan cek email kamu untuk verifikasi.");
         setTimeout(()=> window.location.href = "login.html", 1500);
       } catch (err) {
         alert("❌ Pendaftaran gagal: " + err.message);
