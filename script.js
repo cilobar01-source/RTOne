@@ -1,18 +1,22 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+// ============ Firebase Imports ============ //
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
 
+// ============ Konfigurasi Firebase kamu ============ //
 const firebaseConfig = {
-  apiKey: "AIzaSyCYm8G3JmmpQezxx4p4QpaMLeEhuNixNjA",
-  authDomain: "rt0108-9fd70.firebaseapp.com",
-  projectId: "rt0108-9fd70",
-  storageBucket: "rt0108-9fd70.firebasestorage.app",
-  messagingSenderId: "1038405084605",
-  appId: "1:1038405084605:web:e8f72322234ee8475d9ed4",
-  measurementId: "G-8RM8376FQX"
+  apiKey: "AIzaSyBUv1Rj7p1vBl0gq75XC7NZeJF0--3fKRk",
+  authDomain: "portal-rt-cilosari.firebaseapp.com",
+  projectId: "portal-rt-cilosari",
+  storageBucket: "portal-rt-cilosari.firebasestorage.app",
+  messagingSenderId: "712412960541",
+  appId: "1:712412960541:web:0fc4127020022bc76ab3f4",
+  measurementId: "G-0LRWM5CE1Z"
 };
 
-// 🔧 Inisialisasi Firebase
+// ============ Inisialisasi Firebase ============ //
 export const app = initializeApp(firebaseConfig);
+export const analytics = getAnalytics(app);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
