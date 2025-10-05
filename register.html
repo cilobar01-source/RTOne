@@ -5,111 +5,77 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Daftar Akun · Portal RT Cilosari Barat</title>
 <link rel="stylesheet" href="style.css">
-<script type="module" src="script.js"></script>
-
 <script type="module">
-import { auth, db } from "./script.js";
-import { 
-  createUserWithEmailAndPassword, 
-  sendEmailVerification, 
-  signInWithPhoneNumber, 
-  RecaptchaVerifier 
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { app, auth, db } from "./script.js";
+import { createUserWithEmailAndPassword, sendEmailVerification } 
+  from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { doc, setDoc, serverTimestamp } 
+  from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-let phoneNumber = "";
-
-// Recaptcha wajib untuk verifikasi HP
-document.addEventListener("DOMContentLoaded", ()=>{
-  window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-    size: "normal",
-    callback: () => console.log("✅ Recaptcha verified"),
-  });
-});
-
-// FORM REGISTER
 const form = document.getElementById("f");
+
+// === PROSES REGISTER ===
 form.addEventListener("submit", async (e)=>{
   e.preventDefault();
 
   const nama = f.nama.value.trim();
-  const email = f.email.value.trim();
-  phoneNumber = f.phone.value.trim();
+  const email = f.email.value.trim().toLowerCase();
   const password = f.password.value.trim();
+  const phone = f.phone.value.trim();
 
-  if(!nama || !email || !phoneNumber || !password){
-    alert("⚠️ Lengkapi semua data terlebih dahulu!");
+  if(!nama || !email || !password){
+    alert("⚠️ Harap isi semua data dengan benar!");
     return;
   }
 
-  // Format nomor Indonesia (+62)
-  if(!phoneNumber.startsWith("+")){
-    if(phoneNumber.startsWith("0")) phoneNumber = "+62" + phoneNumber.slice(1);
-    else phoneNumber = "+62" + phoneNumber;
-  }
-
-  // 1️⃣ Buat akun email + password
   try {
+    // 1️⃣ Buat akun baru di Authentication
     const userCred = await createUserWithEmailAndPassword(auth, email, password);
-    await sendEmailVerification(userCred.user);
-    console.log("✅ Email verification sent to:", email);
+    const user = userCred.user;
+    console.log("✅ Akun dibuat:", user.uid);
 
-    // Simpan ke Firestore
-    await setDoc(doc(db, "profiles", userCred.user.uid), {
+    // 2️⃣ Kirim verifikasi email
+    await sendEmailVerification(user);
+    console.log("✉️ Link verifikasi dikirim ke:", email);
+
+    // 3️⃣ Simpan data tambahan ke Firestore
+    await setDoc(doc(db, "profiles", user.uid), {
       nama,
       email,
-      phone: phoneNumber,
-      role: "WARGA",
-      createdAt: new Date()
+      phone,
+      role: "WARGA",           // role default
+      alamat: "Cilosari Barat RT01 RW08, Kel. Kemijen, Semarang Timur",
+      createdAt: serverTimestamp()
     });
 
-    alert("✅ Link verifikasi dikirim ke email " + email + ". Sekarang verifikasi nomor HP.");
-
-    // 2️⃣ Kirim OTP ke HP
-    const appVerifier = window.recaptchaVerifier;
-    const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
-    window.confirmationResult = confirmationResult;
-    document.getElementById("otpForm").style.display = "block";
-  } 
-  catch (error) {
-    alert("❌ Gagal mendaftar: " + error.message);
-    console.error(error);
-  }
-});
-
-// FORM OTP
-const otpForm = document.getElementById("otpForm");
-otpForm.addEventListener("submit", async (e)=>{
-  e.preventDefault();
-  const code = otpForm.otp.value.trim();
-  try {
-    await window.confirmationResult.confirm(code);
-    alert("🎉 Nomor HP berhasil diverifikasi!");
+    alert("🎉 Pendaftaran berhasil! Cek email untuk verifikasi akun.");
     window.location.href = "login.html";
-  } catch(err){
-    alert("❌ Kode OTP salah atau kadaluarsa.");
+  } 
+  catch (err) {
+    console.error("❌ Error register:", err);
+    alert("❌ Gagal mendaftar: " + err.message);
   }
 });
 </script>
 </head>
 
 <body>
-<header><h1>Daftar Akun Portal RT</h1></header>
+<header>
+  <h1>Daftar Akun Portal RT Cilosari Barat</h1>
+</header>
 
 <main class="container">
   <form id="f" class="grid">
     <input class="input" name="nama" type="text" placeholder="Nama Lengkap" required>
     <input class="input" name="email" type="email" placeholder="Alamat Email" required>
-    <input class="input" name="phone" type="tel" placeholder="Nomor HP (contoh: 081234567890)" required>
-    <input class="input" name="password" type="password" placeholder="Kata Sandi (min. 6 karakter)" required>
-    <div id="recaptcha-container"></div>
-    <button class="btn" type="submit">Kirim OTP & Daftar</button>
+    <input class="input" name="phone" type="tel" placeholder="Nomor HP (opsional)">
+    <input class="input" name="password" type="password" placeholder="Kata Sandi (min. 6 karakter)" minlength="6" required>
+    <button class="btn" type="submit">Daftar</button>
   </form>
 
-  <form id="otpForm" class="grid" style="display:none;margin-top:15px;">
-    <input class="input" name="otp" type="text" placeholder="Masukkan Kode OTP" required>
-    <button class="btn" type="submit">Verifikasi Nomor HP</button>
-  </form>
+  <p style="text-align:center;margin-top:10px;">
+    Sudah punya akun? <a href="login.html">Masuk di sini</a>.
+  </p>
 </main>
 </body>
 </html>
