@@ -1,29 +1,102 @@
 <!doctype html>
 <html lang="id">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Daftar Akun · Portal RT Cilosari Barat</title>
-  <style>
-    body { font-family: Arial, sans-serif; background:#f6f8fa; padding:20px; }
-    .container { max-width:400px; margin:auto; background:#fff; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1);}
-    h1 { text-align:center; }
-    input, button { width:100%; padding:10px; margin:8px 0; border:1px solid #ccc; border-radius:5px; }
-    button { background:#007bff; color:#fff; border:none; cursor:pointer; }
-    button:hover { background:#0056b3; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daftar Akun · Portal RT Cilosari Barat</title>
+<link rel="icon" href="logo.png">
+<style>
+  :root {
+    --biru: #0056b3;
+    --emas: #d4a017;
+    --putih: #fff;
+    --abu: #f4f6f8;
+  }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, var(--abu), #e0e7f3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .register-box {
+    background: var(--putih);
+    width: 95%;
+    max-width: 420px;
+    border-radius: 15px;
+    padding: 30px 25px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    animation: fadeIn 0.5s ease-in;
+  }
+  h1 {
+    text-align: center;
+    color: var(--biru);
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+  input {
+    width: 100%;
+    padding: 12px 10px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+    box-sizing: border-box;
+    transition: 0.2s;
+  }
+  input:focus {
+    outline: none;
+    border-color: var(--biru);
+    box-shadow: 0 0 3px var(--biru);
+  }
+  button {
+    width: 100%;
+    background: var(--biru);
+    color: var(--putih);
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 5px;
+    transition: 0.3s;
+  }
+  button:hover {
+    background: var(--emas);
+    color: var(--biru);
+  }
+  p {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 14px;
+  }
+  a {
+    color: var(--biru);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  a:hover {
+    color: var(--emas);
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>Daftar Akun Warga</h1>
+  <div class="register-box">
+    <h1>🪶 Portal RT Cilosari Barat<br>RT01 / RW08</h1>
     <form id="f">
       <input name="nama" type="text" placeholder="Nama Lengkap" required>
       <input name="email" type="email" placeholder="Alamat Email" required>
       <input name="phone" type="tel" placeholder="Nomor HP (opsional)">
       <input name="password" type="password" placeholder="Kata Sandi (min. 6 karakter)" required minlength="6">
-      <button type="submit">Daftar</button>
+      <button type="submit">Daftar Akun</button>
     </form>
-    <p style="text-align:center;">Sudah punya akun? <a href="login.html">Login di sini</a></p>
+    <p>Sudah punya akun? <a href="login.html">Masuk di sini</a></p>
   </div>
 
   <script type="module">
@@ -37,7 +110,6 @@
 
     form.addEventListener("submit", async (e)=>{
       e.preventDefault();
-
       const nama = form.nama.value.trim();
       const email = form.email.value.trim();
       const password = form.password.value.trim();
@@ -58,12 +130,12 @@
           email,
           phone,
           role: "WARGA",
-          alamat: "Cilosari Barat RT01 RW08, Kemijen, Semarang Timur",
+          alamat: "Cilosari Barat RT01 RW08, Kel. Kemijen, Semarang Timur",
           createdAt: serverTimestamp()
         });
 
-        alert("✅ Pendaftaran berhasil! Cek email kamu untuk verifikasi.");
-        setTimeout(()=> window.location.href = "login.html", 1000);
+        alert("✅ Pendaftaran berhasil! Silakan verifikasi email kamu.");
+        setTimeout(()=> window.location.href = "login.html", 1500);
       } catch (err) {
         alert("❌ Pendaftaran gagal: " + err.message);
         console.error(err);
