@@ -1,33 +1,74 @@
-<script type="module">
-  import { auth, db } from "./script.js";
-  import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-  import { doc, setDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Daftar Akun · Portal RT Cilosari Barat</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f6f8fa; padding:20px; }
+    .container { max-width:400px; margin:auto; background:#fff; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1);}
+    h1 { text-align:center; }
+    input, button { width:100%; padding:10px; margin:8px 0; border:1px solid #ccc; border-radius:5px; }
+    button { background:#007bff; color:#fff; border:none; cursor:pointer; }
+    button:hover { background:#0056b3; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Daftar Akun Warga</h1>
+    <form id="f">
+      <input name="nama" type="text" placeholder="Nama Lengkap" required>
+      <input name="email" type="email" placeholder="Alamat Email" required>
+      <input name="phone" type="tel" placeholder="Nomor HP (opsional)">
+      <input name="password" type="password" placeholder="Kata Sandi (min. 6 karakter)" required minlength="6">
+      <button type="submit">Daftar</button>
+    </form>
+    <p style="text-align:center;">Sudah punya akun? <a href="login.html">Login di sini</a></p>
+  </div>
 
-  const form = document.getElementById("registerForm");
+  <script type="module">
+    import { app, auth, db } from "./script.js";
+    import { createUserWithEmailAndPassword, sendEmailVerification } 
+      from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+    import { doc, setDoc, serverTimestamp } 
+      from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const nama = form.nama.value.trim();
-    const email = form.email.value.trim();
-    const password = form.password.value.trim();
+    const form = document.getElementById("f");
 
-    try {
-      const userCred = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCred.user;
+    form.addEventListener("submit", async (e)=>{
+      e.preventDefault();
 
-      // Simpan ke Firestore
-      await setDoc(doc(db, "profiles", user.uid), {
-        nama,
-        email,
-        role: "WARGA",
-        createdAt: new Date()
-      });
+      const nama = form.nama.value.trim();
+      const email = form.email.value.trim();
+      const password = form.password.value.trim();
+      const phone = form.phone.value.trim();
 
-      alert("✅ Pendaftaran berhasil! Silakan login.");
-      window.location.href = "login.html";
-    } catch (err) {
-      alert("❌ Gagal daftar: " + err.message);
-      console.error(err);
-    }
-  });
-</script>
+      if(!nama || !email || !password){
+        alert("⚠️ Lengkapi semua data dengan benar!");
+        return;
+      }
+
+      try {
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCred.user;
+        await sendEmailVerification(user);
+
+        await setDoc(doc(db, "profiles", user.uid), {
+          nama,
+          email,
+          phone,
+          role: "WARGA",
+          alamat: "Cilosari Barat RT01 RW08, Kemijen, Semarang Timur",
+          createdAt: serverTimestamp()
+        });
+
+        alert("✅ Pendaftaran berhasil! Cek email kamu untuk verifikasi.");
+        setTimeout(()=> window.location.href = "login.html", 1000);
+      } catch (err) {
+        alert("❌ Pendaftaran gagal: " + err.message);
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>
