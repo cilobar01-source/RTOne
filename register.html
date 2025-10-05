@@ -1,81 +1,33 @@
-<!doctype html>
-<html lang="id">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Daftar Akun · Portal RT Cilosari Barat</title>
-<link rel="stylesheet" href="style.css">
 <script type="module">
-import { app, auth, db } from "./script.js";
-import { createUserWithEmailAndPassword, sendEmailVerification } 
-  from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { doc, setDoc, serverTimestamp } 
-  from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+  import { auth, db } from "./script.js";
+  import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+  import { doc, setDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-const form = document.getElementById("f");
+  const form = document.getElementById("registerForm");
 
-// === PROSES REGISTER ===
-form.addEventListener("submit", async (e)=>{
-  e.preventDefault();
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const nama = form.nama.value.trim();
+    const email = form.email.value.trim();
+    const password = form.password.value.trim();
 
-  const nama = f.nama.value.trim();
-  const email = f.email.value.trim().toLowerCase();
-  const password = f.password.value.trim();
-  const phone = f.phone.value.trim();
+    try {
+      const userCred = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCred.user;
 
-  if(!nama || !email || !password){
-    alert("⚠️ Harap isi semua data dengan benar!");
-    return;
-  }
+      // Simpan ke Firestore
+      await setDoc(doc(db, "profiles", user.uid), {
+        nama,
+        email,
+        role: "WARGA",
+        createdAt: new Date()
+      });
 
-  try {
-    // 1️⃣ Buat akun baru di Authentication
-    const userCred = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCred.user;
-    console.log("✅ Akun dibuat:", user.uid);
-
-    // 2️⃣ Kirim verifikasi email
-    await sendEmailVerification(user);
-    console.log("✉️ Link verifikasi dikirim ke:", email);
-
-    // 3️⃣ Simpan data tambahan ke Firestore
-    await setDoc(doc(db, "profiles", user.uid), {
-      nama,
-      email,
-      phone,
-      role: "WARGA",           // role default
-      alamat: "Cilosari Barat RT01 RW08, Kel. Kemijen, Semarang Timur",
-      createdAt: serverTimestamp()
-    });
-
-    alert("🎉 Pendaftaran berhasil! Cek email untuk verifikasi akun.");
-    window.location.href = "login.html";
-  } 
-  catch (err) {
-    console.error("❌ Error register:", err);
-    alert("❌ Gagal mendaftar: " + err.message);
-  }
-});
+      alert("✅ Pendaftaran berhasil! Silakan login.");
+      window.location.href = "login.html";
+    } catch (err) {
+      alert("❌ Gagal daftar: " + err.message);
+      console.error(err);
+    }
+  });
 </script>
-</head>
-
-<body>
-<header>
-  <h1>Daftar Akun Portal RT Cilosari Barat</h1>
-</header>
-
-<main class="container">
-  <form id="f" class="grid">
-    <input class="input" name="nama" type="text" placeholder="Nama Lengkap" required>
-    <input class="input" name="email" type="email" placeholder="Alamat Email" required>
-    <input class="input" name="phone" type="tel" placeholder="Nomor HP (opsional)">
-    <input class="input" name="password" type="password" placeholder="Kata Sandi (min. 6 karakter)" minlength="6" required>
-    <button class="btn" type="submit">Daftar</button>
-  </form>
-
-  <p style="text-align:center;margin-top:10px;">
-    Sudah punya akun? <a href="login.html">Masuk di sini</a>.
-  </p>
-</main>
-</body>
-</html>
