@@ -9,7 +9,6 @@
   <script type="module">
   import { sb } from './script.js';
 
-  // Jalankan saat form disubmit
   const form = document.getElementById('f');
   form.addEventListener('submit', async (e)=>{
     e.preventDefault();
@@ -18,12 +17,26 @@
     const email = f.email.value.trim();
     const password = f.password.value.trim();
 
+    // 🔍 Validasi dasar
     if(!nama || !email || !password){
       alert("⚠️ Lengkapi semua data terlebih dahulu!");
       return;
     }
 
-    // Buat akun baru di Supabase Auth
+    // 📧 Validasi format email
+    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+    if(!emailRegex.test(email)){
+      alert("⚠️ Format email tidak valid!\nGunakan format seperti: nama@email.com");
+      return;
+    }
+
+    // 🔒 Validasi panjang password
+    if(password.length < 6){
+      alert("⚠️ Kata sandi minimal 6 karakter!");
+      return;
+    }
+
+    // 🚀 Proses pendaftaran ke Supabase
     const { data, error } = await sb.auth.signUp({
       email: email,
       password: password,
@@ -35,14 +48,13 @@
       return;
     }
 
-    // Ambil ID user baru
     const userId = data?.user?.id;
     if(!userId){
-      alert("Terjadi kesalahan saat mengambil data pengguna.");
+      alert("❌ Tidak bisa mendapatkan ID pengguna baru.");
       return;
     }
 
-    // Tambahkan ke tabel profiles (role default = WARGA)
+    // 🧾 Simpan ke tabel profiles (role default: WARGA)
     const { error: errProfile } = await sb.from("profiles").insert([
       { id: userId, email: email, role: "WARGA" }
     ]);
@@ -56,7 +68,6 @@
     window.location.href = "login.html";
   });
   </script>
-
 </head>
 
 <body>
