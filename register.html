@@ -4,148 +4,62 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Daftar Akun · Portal RT Cilosari Barat</title>
-<link rel="icon" href="logo.png">
 <style>
-  :root {
-    --biru: #0056b3;
-    --emas: #d4a017;
-    --putih: #fff;
-    --abu: #f4f6f8;
-  }
-  body {
-    font-family: "Segoe UI", Arial, sans-serif;
-    background: linear-gradient(135deg, var(--abu), #e0e7f3);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-  }
-  .register-box {
-    background: var(--putih);
-    width: 95%;
-    max-width: 420px;
-    border-radius: 15px;
-    padding: 30px 25px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    animation: fadeIn 0.5s ease-in;
-  }
-  h1 {
-    text-align: center;
-    color: var(--biru);
-    font-size: 22px;
-    margin-bottom: 20px;
-  }
-  input {
-    width: 100%;
-    padding: 12px 10px;
-    margin: 8px 0;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 15px;
-    box-sizing: border-box;
-    transition: 0.2s;
-  }
-  input:focus {
-    outline: none;
-    border-color: var(--biru);
-    box-shadow: 0 0 3px var(--biru);
-  }
-  button {
-    width: 100%;
-    background: var(--biru);
-    color: var(--putih);
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 5px;
-    transition: 0.3s;
-  }
-  button:hover {
-    background: var(--emas);
-    color: var(--biru);
-  }
-  p {
-    text-align: center;
-    margin-top: 15px;
-    font-size: 14px;
-  }
-  a {
-    color: var(--biru);
-    text-decoration: none;
-    font-weight: 600;
-  }
-  a:hover {
-    color: var(--emas);
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+body {font-family: Arial; background:#f6f8fa; display:flex; justify-content:center; align-items:center; height:100vh;}
+.container {background:#fff; padding:25px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); width:90%; max-width:400px;}
+input,button {width:100%; padding:10px; margin:8px 0; border:1px solid #ccc; border-radius:5px;}
+button {background:#0056b3; color:#fff; border:none; font-size:16px; cursor:pointer;}
+button:hover {background:#003d80;}
 </style>
 </head>
 <body>
-  <div class="register-box">
-    <h1>🪶 Portal RT Cilosari Barat<br>RT01 / RW08</h1>
-    <form id="f">
-      <input name="nama" type="text" placeholder="Nama Lengkap" required>
-      <input name="email" type="email" placeholder="Alamat Email" required>
-      <input name="phone" type="tel" placeholder="Nomor HP (opsional)">
-      <input name="password" type="password" placeholder="Kata Sandi (min. 6 karakter)" required minlength="6">
-      <button type="submit">Daftar Akun</button>
+  <div class="container">
+    <h2>🪶 Daftar Akun RT Cilosari</h2>
+    <form id="formDaftar">
+      <input id="nama" type="text" placeholder="Nama Lengkap" required>
+      <input id="email" type="email" placeholder="Alamat Email" required>
+      <input id="password" type="password" placeholder="Kata Sandi (min. 6 karakter)" minlength="6" required>
+      <button type="submit">Daftar</button>
     </form>
-    <p>Sudah punya akun? <a href="login.html">Masuk di sini</a></p>
+    <p id="status" style="text-align:center;color:#555;"></p>
   </div>
 
-  <script type="module">
-    // 🔹 Import konfigurasi Firebase
-    import { app, auth, db } from "./script.js";
-    import { createUserWithEmailAndPassword, sendEmailVerification } 
-      from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-    import { doc, setDoc, serverTimestamp } 
-      from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+<script type="module">
+import { app, auth, db } from "./script.js";
+import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-    const form = document.getElementById("f");
+const form = document.getElementById("formDaftar");
+const status = document.getElementById("status");
 
-    form.addEventListener("submit", async (e)=>{
-      e.preventDefault();
-      const nama = form.nama.value.trim();
-      const email = form.email.value.trim();
-      const password = form.password.value.trim();
-      const phone = form.phone.value.trim();
+form.addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const nama = document.getElementById("nama").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
 
-      if(!nama || !email || !password){
-        alert("⚠️ Lengkapi semua data dengan benar!");
-        return;
-      }
+  status.innerText = "⏳ Mendaftar...";
 
-      try {
-        console.log("⏳ Membuat akun...");
-        const userCred = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCred.user;
-        console.log("✅ Akun berhasil dibuat:", user.uid);
+  try {
+    // 🔹 Buat akun di Authentication
+    const userCred = await createUserWithEmailAndPassword(auth, email, password);
+    const uid = userCred.user.uid;
 
-        await sendEmailVerification(user);
-        console.log("✉️ Email verifikasi dikirim");
-
-        await setDoc(doc(db, "profiles", user.uid), {
-          nama,
-          email,
-          phone,
-          role: "WARGA",
-          alamat: "Cilosari Barat RT01 RW08, Kel. Kemijen, Semarang Timur",
-          createdAt: serverTimestamp()
-        });
-
-        alert("🎉 Registrasi berhasil! Silakan cek email kamu untuk verifikasi.");
-        setTimeout(()=> window.location.href = "login.html", 1500);
-      } catch (err) {
-        alert("❌ Pendaftaran gagal: " + err.message);
-        console.error(err);
-      }
+    // 🔹 Simpan ke Firestore
+    await setDoc(doc(db, "profiles", uid), {
+      nama,
+      email,
+      role: "WARGA",
+      createdAt: new Date().toISOString()
     });
-  </script>
+
+    status.innerText = "✅ Pendaftaran berhasil!";
+    setTimeout(()=>window.location.href="login.html",1500);
+  } catch (err) {
+    console.error(err);
+    status.innerText = "❌ Gagal daftar: " + err.message;
+  }
+});
+</script>
 </body>
 </html>
