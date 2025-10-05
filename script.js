@@ -1,15 +1,7 @@
-// Firebase Import
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { 
-  getAuth, 
-  createUserWithEmailAndPassword, 
-  sendEmailVerification, 
-  signInWithPhoneNumber, 
-  RecaptchaVerifier 
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-// Konfigurasi Firebase (punyamu)
 const firebaseConfig = {
   apiKey: "AIzaSyCYm8G3JmmpQezxx4p4QpaMLeEhuNixNjA",
   authDomain: "rt0108-9fd70.firebaseapp.com",
@@ -20,7 +12,7 @@ const firebaseConfig = {
   measurementId: "G-8RM8376FQX"
 };
 
-// Init Firebase
+// 🔧 Inisialisasi Firebase
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
