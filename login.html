@@ -1,33 +1,146 @@
-
-<!doctype html><html lang="id"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Login · Portal RT</title>
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Login · Portal RT Cilosari Barat</title>
 <link rel="stylesheet" href="style.css">
+
 <script type="module">
-import { sb } from './script.js';
-const form = document.getElementById('f');
-form.addEventListener('submit', async (e)=>{
+import { auth, db } from "./script.js";
+import { 
+  signInWithEmailAndPassword, 
+  signInWithPhoneNumber, 
+  RecaptchaVerifier, 
+  onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+// === Setup Recaptcha ===
+document.addEventListener("DOMContentLoaded", ()=>{
+  window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+    size: "normal",
+    callback: () => console.log("✅ Recaptcha aktif"),
+  });
+});
+
+// === Login Form ===
+const form = document.getElementById("loginForm");
+let confirmationResult;
+
+// Fungsi utama login
+form.addEventListener("submit", async (e)=>{
   e.preventDefault();
-  const email = f.email.value.trim(); const password = f.password.value;
-  const { error } = await sb.auth.signInWithPassword({ email, password });
-  if(error){ alert('Login gagal: '+error.message); return; }
-  const { data: { session } } = await sb.auth.getSession();
-  const { data: prof } = await sb.from('profiles').select('role').eq('id', session.user.id).single();
-  const role = prof?.role || 'WARGA';
-  const map = { RT:'dashboard-rt.html', PKK:'dashboard-pkk.html', Karang:'dashboard-karang.html', WARGA:'warga.html' };
-  window.location.href = map[role] || 'index.html';
+
+  let input = form.identifier.value.trim();
+  const password = form.password.value.trim();
+
+  if(!input){
+    alert("⚠️ Masukkan email atau nomor HP terlebih dahulu!");
+    return;
+  }
+
+  try {
+    // Jika input mengandung '@' → dianggap email
+    if(input.includes("@")){
+      const userCred = await signInWithEmailAndPassword(auth, input, password);
+      const user = userCred.user;
+      console.log("✅ Login email berhasil:", user.email);
+      handleRedirect(user.uid);
+    } 
+    else {
+      // Format nomor telepon ke internasional
+      if(!input.startsWith("+")){
+        if(input.startsWith("0")) input = "+62" + input.slice(1);
+        else input = "+62" + input;
+      }
+
+      const appVerifier = window.recaptchaVerifier;
+      confirmationResult = await signInWithPhoneNumber(auth, input, appVerifier);
+      document.getElementById("otpForm").style.display = "block";
+      alert("📱 OTP dikirim ke " + input);
+    }
+  } 
+  catch (error) {
+    alert("❌ Login gagal: " + error.message);
+    console.error(error);
+  }
+});
+
+// === OTP Form ===
+const otpForm = document.getElementById("otpForm");
+otpForm.addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const otp = otpForm.otp.value.trim();
+
+  try {
+    const result = await confirmationResult.confirm(otp);
+    const user = result.user;
+    console.log("🎉 Login OTP sukses:", user.phoneNumber);
+    handleRedirect(user.uid);
+  } 
+  catch (err){
+    alert("❌ OTP salah atau kadaluarsa.");
+  }
+});
+
+// === Cek role dan arahkan ke dashboard ===
+async function handleRedirect(uid){
+  try {
+    const snap = await getDoc(doc(db, "profiles", uid));
+    const role = snap.exists() ? snap.data().role : "WARGA";
+
+    switch(role){
+      case "RT":
+      case "SuperRT":
+        window.location.href = "dashboard-rt.html";
+        break;
+      case "PKK":
+        window.location.href = "dashboard-pkk.html";
+        break;
+      case "Karang":
+        window.location.href = "dashboard-karang.html";
+        break;
+      default:
+        window.location.href = "warga.html";
+    }
+  } catch (e){
+    console.error("Gagal ambil role:", e);
+    window.location.href = "warga.html";
+  }
+}
+
+// === Cek kalau user sudah login (biar gak ulang login) ===
+onAuthStateChanged(auth, (user)=>{
+  if(user){
+    console.log("✅ Sudah login, redirect otomatis");
+    handleRedirect(user.uid);
+  }
 });
 </script>
-</head><body class="role-RT">
-<header class="header"><div class="brand"><img class="logo" src="assets/icon-192.png"><div><h1>Portal RT — Login</h1><p>Masuk untuk mengelola pengumuman</p></div></div></header>
-<main class="container">
-  <div class="card">
-    <form id="f" class="grid">
-      <input class="input" name="email" type="email" placeholder="Email" required>
-      <input class="input" name="password" type="password" placeholder="Kata sandi" required>
-      <button class="btn" type="submit">Masuk</button>
+</head>
+
+<body>
+  <header>
+    <h1>Masuk Portal RT01 / RW08 Cilosari Barat</h1>
+  </header>
+
+  <main class="container">
+    <form id="loginForm" class="grid">
+      <input class="input" name="identifier" type="text" placeholder="Email atau Nomor HP" required>
+      <input class="input" name="password" type="password" placeholder="Kata Sandi (hanya untuk login email)">
+      <div id="recaptcha-container"></div>
+      <button class="btn" type="submit">Masuk Sekarang</button>
     </form>
-    <p>Belum punya akun? <a href="register.html">Daftar di sini</a>.</p>
-  </div>
-</main>
-</body></html>
+
+    <form id="otpForm" class="grid" style="display:none;margin-top:15px;">
+      <input class="input" name="otp" type="text" placeholder="Masukkan Kode OTP" required>
+      <button class="btn" type="submit">Verifikasi OTP</button>
+    </form>
+
+    <p style="text-align:center;margin-top:10px">
+      Belum punya akun? <a href="register.html">Daftar di sini</a>
+    </p>
+  </main>
+</body>
+</html>
